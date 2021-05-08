@@ -22,7 +22,7 @@ int main(){
     for(i=0; i < 3; i++){
         for(j=0; j < 6; j++) scanf("%d", &mtx2[i][j]);
     } printf("\n");
-    // mengalikan
+    // mengalikan matrix 1 & matrix 2
     for(i=0; i < 4;i ++){
         for(j=0; j < 6; j++){
             for (k = 0; k < 3; k++){
@@ -32,7 +32,6 @@ int main(){
             temp=0;
         }
     } 
-
     // cek mtx1, mtx2, hasil
     // for(i=0; i < 4; i++){
     //     for(j=0; j < 3; j++){
@@ -44,17 +43,18 @@ int main(){
     //         printf("%d ", mtx2[i][j]);
     //     }printf("\n");
     // }printf("\n");
+    // hasil kali matrix di buat jadi array 1D dan disimpan di value
     printf("hasil:\n");
     for(i=0; i < 4;i ++){
         for(j=0; j < 6; j++){
             printf("%d ", value[i*6 + j]);
         }printf("\n");
     }
+    // soal2a berjalan trus hingga soal2b selesai
     while(1){
-		if (*wait == 1) {printf("soal2b.c done!\n"); break;}
+		if (*wait == 1){printf("soal2b.c done!\n"); break;}
 		printf("waiting...\n"); sleep(3);
 	}
-
     shmdt(value);
     shmdt(wait);
     shmctl(shmid, IPC_RMID, NULL);
