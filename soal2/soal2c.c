@@ -7,7 +7,7 @@
 int main() {
 pid_t child_id;
 int status, status2, fp1[2], fp2[2];
-
+//checking pipa rucika wkwk
 if (pipe(fp1)==-1){
   fprintf(stderr, "Pipe Failed" );
   return 1;
@@ -22,13 +22,15 @@ child_id = fork();
  if (child_id < 0) {
   exit(EXIT_FAILURE);
 }
-
+//mulai membuat fork
 if (child_id == 0) {
+  // The dup2():function duplicates an open file descriptor.
   close(fp1[0]); // read ditutup
   dup2(fp1[1], STDOUT_FILENO);
   char *argv[] = {"ps", "-aux", NULL};
   execv("/bin/ps", argv);
 } else {  // this is parent
+// parent buat fork lagi
   while ((wait(&status)) > 0);
   child_id = fork();
    if (child_id < 0) {
