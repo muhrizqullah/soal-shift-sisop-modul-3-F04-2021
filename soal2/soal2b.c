@@ -7,9 +7,7 @@
 pthread_t tid1[24];
 int *value, *wait, valTemp[24], addressTemp, address, i, j, mtx3[24];
 unsigned long ans[24];
-unsigned long factcal(int n) {
-   return (n>=1) ? n*factcal(n-1) : 1;
-}
+unsigned long factcal(int n) {return (n>=1) ? n*factcal(n-1) : 1;}
 
 void* factorial(void *arg){
     int *addressTemp = (int*) arg;
@@ -35,10 +33,10 @@ int main(){
     printf("mtx3:\n");
     for(i = 0; i < 24; i++) scanf("%d", &mtx3[i]);
 
-    //thread
+    //thread faktorisasi
     for(i = 0; i < 4; i++){
         for(j = 0; j < 6; j++){
-            address = i*6+j;
+            address = i*6+j; //posisi array 1D
             pthread_create(&(tid1[address]), NULL, 
             &factorial, (void *) &address);
             pthread_join(tid1[address], NULL);
@@ -59,7 +57,8 @@ int main(){
 		}
 		printf("\n");
 	}
-
+    // soal2b selesai, mengupdate wait ke 1, program 2a akan selesai
+    // di-comment jika ingin soal2a tetap berjalan/ tetap mengakses value
     *wait = 1;
     shmdt(value);
 	shmdt(wait);
@@ -84,5 +83,4 @@ hasil faktorial:
 154440 1716 240 15 43680 6
 1 4 504 6 30 210
 4 72 2730 57120 720 42
-
 */
