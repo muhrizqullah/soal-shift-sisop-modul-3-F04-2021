@@ -210,6 +210,7 @@ parent dari child kedua ini akan menjalankan command terakhir, yaitu `head -5`. 
         char *argv2[] = {"head", "-5", NULL};
 	    execv("/usr/bin/head", argv2);
   }
+```
 ### Output
 #### Soal 2a
 Proses memasukankan nilai setiap matriks
