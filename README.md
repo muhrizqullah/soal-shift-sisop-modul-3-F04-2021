@@ -74,13 +74,73 @@ shmctl(shmid, IPC_RMID, NULL);
 ```
 ### Soal 2b
 Membuat program dengan menggunakan matriks output dariprogram soal2a.c. Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya. Perhitungan setiap cel menggunakan `thread`.
+
 Sama seperti soal 2a, terlebih dahulu menciptakan _segment memory_ (`shmget()`) & meng-_attach_ variabel yang akan digunakan (`shmat()`). `value` akan menyimpan nilai dari hasil perkalian dari dua matrix di _shared memory_. `wait` akan menjadi indikator bahwa __soal 2b__ telah selesai menggunakan `value`. `wait` bernilai awal 0.
 Setelah menciptakan _segment memory_, program dapat menerima input untuk matriks 4x6 yang baru dalam bentuk _array 1D_, karena menyesuaikan dengan `value` yang berbentuk _array 1D_.
 ```C
     printf("mtx3:\n");
     for(i = 0; i < 24; i++) scanf("%d", &mtx3[i]);
 ```
+Kemudian matriks baru tersebut menjalankan perhitingan faktorial dengan menggunakan thread. Dimulai dengan membuat thread/`pthread_create()` terlebih dahulu dengan:
+- `tid1[]` digunakan untuk menunjukkan alamat memori dengan thread ID dari thread baru & inisialisasi array untuk menampung thread
+- nilai attr di-set __NULL__ agar thread menggunakan atribut default.
+- Thread yang baru dibuat akan berjalan dimulai dari fungsi factorial() dalam fungsi thread.
+- Pointer `address` digunakan untuk memberikan sebuah argumen ke fungsi factorial()
 
+Dan dengan `pthread_join(tid1[address], NULL)` untuk memastikan bahwa thread `tid1[address]` berhasil berhenti dan mengembalikan nilai NULL jika berhasil berhenti.
+```C
+    #include <pthread.h>
+    pthread_t tid1[24];
+...
+    for(i = 0; i < 4; i++){
+        for(j = 0; j < 6; j++){
+            address = i*6+j; //posisi array 1D
+            pthread_create(&(tid1[address]), NULL, 
+            &factorial, (void *) &address);
+            pthread_join(tid1[address], NULL);
+        }
+    }
+```
+Untuk proses perhitungan faktorial dari kedua matriks ini perlu memperhatikan beberapa syarat:
+- jika nilai cel matriks `value` >= matriks baru, maka hasil faktorial = value!/(value-baru)!
+- jika nilai cel matriks baru > matriks `value` , maka hasil faktorial = value!
+- jika nilai cel matriks `value` = 0, maka hasil faktorial = 0
+
+`*arg` yang di-_passing_ dari `pthread_create()` berisi posisi dari cel yang akan dihitung, yaitu `i*6+j` dan hasil faktorial disimpan di array 1D `ans[]`
+```C
+    void* factorial(void *arg){
+        int *addressTemp = (int*) arg;
+        if(value[*addressTemp] >= mtx3[*addressTemp]){
+            ans[*addressTemp] +=             factcal(value[*addressTemp])/factcal(value[*addressTemp]-mtx3[*addressTemp]);
+        }
+        else if (value[*addressTemp] < mtx3[*addressTemp]){
+            ans[*addressTemp] += factcal(value[*addressTemp]);
+        } else ans[*addressTemp] = 0;
+    }
+```
+terdapat fungsi rekursif `factcal()` untung menghitunga faktorial dari nilai yang dipakai
+```C
+    unsigned long factcal(int n){
+        return (n>=1) ? n*factcal(n-1) : 1;
+    }
+```
+Setelah menyelesaikan perhitungan faktorial, maka hasil tersebut dapat dicetak.
+```C
+    printf("\nhasil fact:\n");
+    for(int i = 0; i < 4  ; i++){
+    	for(int j = 0; j < 6; j++){
+	    	printf("%lu ", ans[i*6+j]);
+	    }
+    	printf("\n");
+    }
+```
+Ketika soal2b.c telah selesai menggunakan nilai dari `value`, maka nilai `*wait` dirubah menjadi 1 agar menginfokan soal2a.c bahwa soal2b.c telah selesai. `value` dan `wait` dapat dilepas/detach dari shared memory yang tersedia dengan cara
+```C
+    *wait = 1;
+    shmdt(value);
+	shmdt(wait);
+    shmctl(shmid, IPC_RMID, NULL);
+```
 ### Soal 2c
 Karena takut _lag_ dalam pengerjaannya membantu Loba, Crypto juga membuat program __IPC Pipes__ untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command `ps -aux | sort -nrk 3,3 | head -5`
 
