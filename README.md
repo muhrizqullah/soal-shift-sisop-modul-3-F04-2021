@@ -138,12 +138,78 @@ Ketika soal2b.c telah selesai menggunakan nilai dari `value`, maka nilai `*wait`
 ```C
     *wait = 1;
     shmdt(value);
-	shmdt(wait);
+    shmdt(wait);
     shmctl(shmid, IPC_RMID, NULL);
 ```
 ### Soal 2c
 Karena takut _lag_ dalam pengerjaannya membantu Loba, Crypto juga membuat program __IPC Pipes__ untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command `ps -aux | sort -nrk 3,3 | head -5`
 
+Soal ini juga memakai konsep ` fork parent-child` untuk membantu menjalan kan _command_ tersebut.
+Program dapat diawali dengan menginisiasi __dua _pipes___ dan memastikan bahwa tidak gagal saat inisiasi
+```C
+    int fp1[2], fp2[2];
+    if (pipe(fp1)==-1){
+        fprintf(stderr, "Pipe Failed" );
+        return 1;
+    }
+
+    if (pipe(fp2)==-1){
+        fprintf(stderr, "Pipe Failed" );
+        return 1;
+    }
+```
+Setelah berhasil menginisiasi kedua _pipe_ tersebut, maka dapat memanggil fungsi `fork()` untuk menjalankan _command_ tersebut
+```C
+    pid_t child_id;
+    child_id = fork();
+    if (child_id < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (child_id == 0) {
+    ...
+    }
+    else {
+    ...
+    }
+```
+Pada `fork()` pertama, child pertama akan menjalankan _command_ `ps -aux`, menutup _read pipe 1_ `fp1[0]`, dan menduplikasi _write pipe 1_ `fp1[1]` ke `STDOUT_FILENO` agar tetap terhubung dengan proses berikutnya
+```C
+    if (child_id == 0) {
+        close(fp1[0]); // read ditutup
+        dup2(fp1[1], STDOUT_FILENO);
+        char *argv[] = {"ps", "-aux", NULL};
+        execv("/bin/ps", argv);
+    }
+```
+Setelah proses _child_ pertama selesai, proses parent akan melakukan `fork()` lagi dan membuat child kedua yang akan menjalankan _command_ `sort -nrk 3,3`. _write pipe 1_ `fp1[1]` & _read pipe 2_ `fp2[0]` ditutup. File descriptor `fp1[0]` diduplikasi ke `STDIN_FILENO` & `fp2[1]` diduplikasi ke `STDOUT_FILENO` agar tetap terhubung dengan proses berikutnya
+```C
+    else {  // this is parent
+        while ((wait(&status)) > 0);
+        child_id = fork();
+        if (child_id < 0) {
+            exit(EXIT_FAILURE);
+        }
+        if (child_id == 0){
+            close(fp1[1]); // write ditutup
+            dup2(fp1[0], STDIN_FILENO);
+            close(fp2[0]); // read ditutup
+            dup2(fp2[1], STDOUT_FILENO);
+            char *argv1[] = {"sort", "-nrk", "3,3", NULL};
+	        execv("/usr/bin/sort", argv1);
+        }
+    }
+```
+parent dari child kedua ini akan menjalankan command terakhir, yaitu `head -5`. _write pipe 1_ `fp1[1]` & _write pipe 2_ `fp2[1]` ditutup. File descriptor `fp2[0]` diduplikasi ke `STDIN_FILENO`
+```C
+    else{
+        close(fp1[1]); // write ditutup
+        while ((wait(&status2)) > 0);
+        close(fp2[1]); // write ditutup
+        dup2(fp2[0], STDIN_FILENO);
+        char *argv2[] = {"head", "-5", NULL};
+	    execv("/usr/bin/head", argv2);
+  }
 ### Output
 #### Soal 2a
 Proses memasukankan nilai setiap matriks
