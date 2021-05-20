@@ -214,20 +214,20 @@ parent dari child kedua ini akan menjalankan command terakhir, yaitu `head -5`. 
 ### Output
 #### Soal 2a
 Proses memasukankan nilai setiap matriks
-<img alt="soal2aa" src="Foto/2aa.JPG">
+<img alt="soal2aa" src="Foto/2aa.png">
 
 Hasil perkalian matriks dan _looping_ yang berjalan hingga soal 2b selesai
-<img alt="soal2ab" src="Foto/2ab.JPG">
-<img alt="soal2ac" src="Foto/2ac.JPG">
+<img alt="soal2ab" src="Foto/2ab.png">
+<img alt="soal2ac" src="Foto/2ac.png">
 #### Soal 2b
 Proses memasukankan nilai setiap matriks yang baru
-<img alt="soal2ba" src="Foto/2ba.JPG">
+<img alt="soal2ba" src="Foto/2ba.png">
 
 Hasil perhitungan faktorial setiap cel pada matriks
-<img alt="soal2bb" src="Foto/2bb.JPG">
+<img alt="soal2bb" src="Foto/2bb.png">
 #### Soal 2c
 Output dari `soal2c.c`
-<img alt="soal2c" src="Foto/2c.JPG">
+<img alt="soal2c" src="Foto/2c.png">
 ### Kendala
 Sempat kebingungan untuk menentukan pipe yang di-`close()` dan penggunaan `dup2()`
 
