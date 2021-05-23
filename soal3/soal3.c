@@ -14,8 +14,6 @@
 char *getName(char *dir)
 {
     char *name = strrchr(dir, '/');
-    if (name == dir)
-        return "";
     return name + 1;
 }
 
