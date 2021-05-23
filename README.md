@@ -110,9 +110,397 @@ printf("There is user register with username & password :%s\n",u.name);
  ```
 ### Soal 1b
 Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
+```C
+mkdir("/home/fiansyah/praktikum3/finak/server/file",0777);
+```
+Untuk penambahan ke tsv dilakukan saat ada perubahan pada saat delete maupun Add.
+Contoh penambahan pada file tsv:
+```c
+FILE *ftsv = fopen(filename1,"a+");
+```
+### Soal 1c
+Ada fitur Add untuk menambahkan file dari client ke server.Identitas filepath,publisher,dan tahun file kita akan simpan ke file tsv kemudian buku akan lakukan send ke server dari client. 
+```C
+else if(strcmp(buff,"Add")==10){
+                flag=4;
+		printf("Add\n");
+                char login1[]="Publisher:";
+                write(sockfd, login1, sizeof(login1));
+                continue;
+        }
+
+	
+```
+Apabila cocok dilakukan lanjutan ke subprogram.Dimana file dari client di cek eksis atau tidak. Apabila iya, file dikirim ke folder ~/server/file,apabila tidak maka kirim reply ke server bahwa gagal
+```C
+else if(flag==4)
+    {
+
+//printf("flag=4\n");
+        flag=0;
+
+          // receive file name
+	FILE *p,*q,*r;
+	char tulis[strlen(buff)];
+	strcpy(tulis,buff);
+ 	char *publisher;
+        publisher=strtok(buff,",");
+	p=fopen(publisher,"r");
+	if (p == NULL||loginer==0){
+        char login[]="\nFile Failed opened!\n";
+        write(sockfd, login, sizeof(login));
+        continue;
+
+        }
+        else{
+	    FILE *ftsv = fopen(filename1,"a+");
+            fprintf(ftsv,tulis);
+	    fprintf(ftsv,"\n");
+             fclose(ftsv);
+
+	}
+
+	printf("\nFile Name Received: %s\n", publisher);
+       chdir("/home/fiansyah/praktikum3/finak/server/file");
+   char* token = strtok(publisher, "/");
+   char* save[10];
+  i=0;
+    
+    while (token != NULL) {
+       token=strtok(NULL, "/");
+	save[i]=token;
+	i++;
+    }
+	q=fopen(save[i-2],"a+");
+        if (p == NULL){
+        char login[]="\nFile Failed opened!\n";
+        write(sockfd, login, sizeof(login));
+        continue;
+
+	}
+        else{
+	    createNew(p,q);
+          //  printf("\nFile Successfully opened!\n");
+	    fclose(p);
+	    fclose(q);
+
+	FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
+	fprintf(r,"Tambah:");
+	fprintf(r,save[i-2]);
+	fprintf(r,"(");
+	fprintf(r,userlogin);
+	fprintf(r,")\n");
+	fclose(r);
+	    char login[]="\nFile Successfully opened!\n";
+            write(sockfd, login, sizeof(login));
+            continue;
+        }
+   }
+```
+### Soal 1d
+Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
+
+```C
+if(strcmp(cek,"download")==0){
+                flag=5;
+                cek=strtok(NULL," ");
+        }
+```
+Kemudian apabil cocok lanjut ke sub program selanjutnya
+```C
+ else if(flag==5){
+	flag=6;
+	printf("cek:%s\n",cek);
+	if(cekdownload(cek,sockfd)>=1){     
+		if(loginer==0){
+	printf("TIDAK DITEMUKAN\n");
+        flag=0;
+        char login1[]="Gagal\n";
+        write(sockfd, login1, sizeof(login1));
+	continue;
+		}
+          
+               write(sockfd, cek, sizeof(buff));
+               continue;
+	}
+	else {
+	     flag=0;
+               continue;
+        }
+
+	
+  }
+```
+```c
+if(flag==6){
+        flag=0;
+         FILE *p,*q;
+	chdir("/home/fiansyah/praktikum3/finak/server/file");
+        p=fopen(buff,"r");
+	if(p!=NULL){
+	chdir("/home/fiansyah/praktikum3/finak/client");
+        q=fopen(buff,"a+");
+        createNew(p,q);
+        fclose(p);
+        fclose(q);
+        char login1[]="\nBerhasil download\n";
+        write(sockfd, login1, sizeof(login1));
+        continue;
+	}
+	else {
+	char login1[]="\nGagal download\n";
+        write(sockfd, login1, sizeof(login1));
+	}
+  	}
+```
+### Soal 1e
+Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
+```C
+ if(strcmp(cek,"delete")==0){
+                flag=7;
+                cek=strtok(NULL," ");
+        }
+```
+```C
+   else if(flag==7){
+        flag=8;
+	int value=cekdownload(cek,sockfd);
+        if(value>=1){
+    if(loginer==0){
+        printf("TIDAK DITEMUKAN\n");
+        flag=0;
+        char login1[]="Gagal\n";
+        write(sockfd, login1, sizeof(login1));
+        continue;
+                }
+	delete(value-1);
+               write(sockfd, cek, sizeof(buff));
+               continue;
+        }
+        else {
+              flag=0;
+               continue;
+        }
+
+
+  }
+```
+```C
+if(flag==8){
+        flag=0;
+         FILE *p,*q;
+        chdir("/home/fiansyah/praktikum3/finak/server/file");
+        p=fopen(buff,"r");
+        if(p!=NULL){
+	char baru[]="old-";
+        q=fopen(strcat(baru,buff),"a+");
+        createNew(p,q);
+        fclose(p);
+        fclose(q);
+	remove(buff);
+	FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
+	fprintf(r,"Hapus:");
+	fprintf(r,buff);
+	fprintf(r,"(");
+	fprintf(r,userlogin);
+	fprintf(r,")\n");
+	fclose(r);
+        char login1[]="\nBerhasil delete\n";
+        write(sockfd, login1, sizeof(login1));
+        continue;
+        }
+        else {
+        char login1[]="\nGagal delete\n";
+        write(sockfd, login1, sizeof(login1));
+        }
+        }
+```
+### Soal 1f
+Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format.
+```C
+ else if(strcmp(buff,"see")==10){
+                flag=9;
+        	printf("see\n");
+		FILE *j=fopen(filename1,"r");
+                
+   }
+```
+```C
+ else if(flag==9){
+	int flag1=0;
+	flag=0;
+    char uname[80];
+    char kosong[]=" ";
+    FILE *j=fopen(filename1,"r");
+    
+
+    int loop=20;
+    for(loop=0;loop<20;loop++)
+    {
+        fscanf(j,"%s",uname);
+//	printf("uname=%d\n loop=%d\n",strcmp(uname,""),loop);
+        if((strcmp(uname,"")==32&&loop==0)||loginer==0){
+	flag=0;
+	flag1=1;
+	char* berhasil="";
+        write(sockfd, berhasil, sizeof(berhasil));
+        break;
+	}
+	else ;
+	if(strcmp(uname,kosong)==0)break;
+	char* path=strtok(uname,",");
+	char path1[strlen(path)];
+	strcpy(path1,path);
+	char* identitas=strtok(NULL,"");
+	char identitas1[strlen(identitas)];
+        strcpy(identitas1,identitas);
+        char* tahun=strtok(identitas,",");
+        tahun=strtok(NULL,",");
+	char tahun1[strlen(tahun)];
+        strcpy(tahun1,tahun);
+
+	char* token = strtok(path1, "/");
+	char* save[10];
+ 	 int l=0;
+	FILE *h=fopen("/home/fiansyah/praktikum3/finak/client/data.txt","a+");
+    while (token != NULL) {
+       token=strtok(NULL, "/");
+        save[l]=token;
+//	printf("save[%d]=%s\n",l,save[l]);
+       l++;
+    }
+	char* format=strtok(save[l-2],".");
+	format=strtok(NULL,".");
+	
+	fprintf(h,"\nNama:");
+	fprintf(h,save[l-2]);
+        fprintf(h,".");
+        fprintf(h,format);
+	fprintf(h,"\nPublisher:");
+	fprintf(h,identitas);
+	fprintf(h,"\nTahun Publishing:");
+	fprintf(h,tahun1);
+	fprintf(h,"\nEktensi File:");
+	fprintf(h,format);
+	fprintf(h,"\nFilepath:");
+	fprintf(h,path);
+	fprintf(h,"\n");
+	fclose(h);
+	
+	strcpy(uname,kosong);
+	char* berhasil="";
+	write(sockfd, berhasil, sizeof(berhasil));
+        continue;
+
+    }
+       continue;
+  }
+```
+### Soal 1g
+Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f. Di cek terlebih dahulu
+```C
+if(strcmp(cek,"find")==0){
+		printf("find\n");
+                flag=10;
+                cek=strtok(NULL," ");
+        }
+```
+Apabila betul maka lanjut ke sub program
+```C
+else if(flag==10){
+	printf("finddddd");
+        int flag1=0;
+	int flag2=0;
+        flag=0;
+    char uname[80];
+    char kosong[]=" ";
+    FILE *j=fopen(filename1,"r");
+
+
+    int loop=20;
+    for(loop=0;loop<20;loop++)
+    {
+        fscanf(j,"%s",uname);
+     //   printf("uname=%d\n loop=%d\n",strcmp(uname,""),loop);
+        if((strcmp(uname,"")==32&&loop==0)||loginer==0){
+        flag=0;
+        flag1=1;
+        char* berhasil="";
+        write(sockfd, berhasil, sizeof(berhasil));
+        break;
+        }
+        else ;
+        if(strcmp(uname,kosong)==0)break;
 
 
 
+	char* path=strtok(uname,",");
+	FILE *h=fopen("/home/fiansyah/praktikum3/finak/client/data.txt","a+");
+//	printf("strstr=%s\n",strstr(path,cek));
+	if(strstr(path,cek)!=NULL){
+//	printf("ketemu yesssssss\n");
+		flag2=0;
+		 char berhasil[]="ketemu";
+                 write(sockfd, berhasil, sizeof(berhasil));
+
+         }
+        else{
+         fclose(h);
+        	char berhasil[]="";
+     		 write(sockfd, berhasil, sizeof(berhasil));
+
+             	continue;
+         }
+
+
+
+        char path1[strlen(path)];
+        strcpy(path1,path);
+        char* identitas=strtok(NULL,"");
+        char identitas1[strlen(identitas)];
+        strcpy(identitas1,identitas);
+        char* tahun=strtok(identitas,",");
+        tahun=strtok(NULL,",");
+        char tahun1[strlen(tahun)];
+        strcpy(tahun1,tahun);
+
+        char* token = strtok(path1, "/");
+        char* save[10];
+         int l=0;
+        
+    while (token != NULL) {
+       token=strtok(NULL, "/");
+        save[l]=token;
+//      printf("save[%d]=%s\n",l,save[l]);
+       l++;
+    }
+        char* format=strtok(save[l-2],".");
+        format=strtok(NULL,".");
+
+        fprintf(h,"\nNama:");
+        fprintf(h,save[l-2]);
+        fprintf(h,".");
+        fprintf(h,format);
+        fprintf(h,"\nPublisher:");
+        fprintf(h,identitas);
+        fprintf(h,"\nTahun Publishing:");
+        fprintf(h,tahun1);
+        fprintf(h,"\nEktensi File:");
+        fprintf(h,format);
+        fprintf(h,"\nFilepath:");
+        fprintf(h,path);
+        fprintf(h,"\n");
+        fclose(h);
+
+        strcpy(uname,kosong);
+        char* berhasil="";
+     write(sockfd, berhasil, sizeof(berhasil));
+        continue;
+
+    }
+continue;
+  }
+```
 
 ## Soal 2
 Crypto adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
