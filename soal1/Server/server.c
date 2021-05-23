@@ -223,7 +223,7 @@ void func(int sockfd)
     for (;;) {
 
         bzero(buff, MAX);
-  
+  	mkdir("/home/fiansyah/praktikum3/finak/server/file",0777);
         // read the message from client and copy it in buffer
          read(sockfd, buff, sizeof(buff));
 	if(flag==6){
