@@ -335,6 +335,10 @@ char *toLower(char *str)
 ```
 Untuk mengubah huruf kapital menjadi huruf kecil.
 
+<img alt="3.1" src="Foto/3.1.png">
+
+<img alt="3.1.1" src="Foto/3.1.1.png">
+
 ### Soal 3b
 Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada
 suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1
@@ -404,7 +408,11 @@ void categorizeDirectory(char *folderPath, int thread)
     closedir(directory);
 }
 ```
-pada fungsi ini berfungsi untuk mencari file yang berada didalam directory. dan akan dibuatkan thread untuk dikategorikan menggunakan fungsi `categorizeFile()`. Setelah itu dilakukan `pthread_join` sejumlah thread yang ada.
+Pada fungsi ini berfungsi untuk mencari file yang berada didalam directory. dan akan dibuatkan thread untuk dikategorikan menggunakan fungsi `categorizeFile()`. Setelah itu dilakukan `pthread_join` sejumlah thread yang ada.
+
+<img alt="3.2" src="Foto/3.2.png">
+
+<img alt="3.2.1" src="Foto/3.2.1.png">
 
 ### Soal 3c
 Selain menerima opsi-opsi di atas, program ini menerima opsi *, Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika menjalankan program C tersebut.
@@ -428,6 +436,10 @@ Selain menerima opsi-opsi di atas, program ini menerima opsi *, Opsi ini akan me
     }
 ```
 Sama persis dengan soal 3b namun direktori yang dikategorikan adalah direktori dimana program dijalankan atau *working directory*. Sehingga tidak perlu argumen tambahan berupa path directorynya.
+
+<img alt="3.3" src="Foto/3.3.png">
+
+<img alt="3.3.1" src="Foto/3.3.1.png">
 
 ### Soal 3d
 Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
