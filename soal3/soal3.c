@@ -75,11 +75,11 @@ void *categorizeFile(void *arg)
     rename(srcPath, destPath);
 }
 
-void categorizeDirectory(char *folderPath, int threadSize)
+void categorizeDirectory(char *folderPath, int thread)
 {
     DIR *directory = opendir(folderPath);
     struct dirent *dr;
-    pthread_t tid[threadSize];
+    pthread_t tid[thread];
     int count = 0;
     char fileName[400][400];
 
@@ -97,20 +97,20 @@ void categorizeDirectory(char *folderPath, int threadSize)
             sprintf(folderPath2, "%s/%s", folderPath, dr->d_name);
             DIR *directory2 = opendir(folderPath2);
             struct dirent *dr2;
-            int threadSize2 = 0;
+            int thread2 = 0;
             while ((dr2 = readdir(directory2)) != NULL)
             {
                 if (dr2->d_type == DT_REG)
                 {
-                    threadSize2++;
+                    thread2++;
                 }
             }
-            categorizeDirectory(folderPath2, threadSize2);
+            categorizeDirectory(folderPath2, thread2);
             closedir(directory2);
         }
     }
 
-    for (int i = 0; i < threadSize; i++)
+    for (int i = 0; i < thread; i++)
         pthread_join(tid[i], NULL);
     closedir(directory);
 }

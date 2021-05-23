@@ -336,3 +336,132 @@ char *toLower(char *str)
 Untuk mengubah huruf kapital menjadi huruf kecil.
 
 ### Soal 3b
+Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada
+suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1
+directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin.
+```c
+else if (argc == 3 && strcmp(argv[1], "-d") == 0)
+    {
+        DIR *directory = opendir(argv[2]);
+        if (directory)
+        {
+            struct dirent *dr;
+            int thread = 0;
+            while ((dr = readdir(directory)) != NULL)
+            {
+                if (dr->d_type == DT_REG)
+                {
+                    thread++;
+                }
+            }
+            categorizeDirectory(argv[2], thread);
+            closedir(directory);
+            printf("Direktori Sukses disimpan!\n");
+        }
+        else if (ENOENT == errno)
+            printf("Yah, gagal disimpan :(\n");
+    }
+```
+Pertama akan dicek dulu opsi yang dipilih pada `argv[1]` kemudian akan membuka directory dan membacanya dan menghitung file yang ada untuk dikategorikan, selanjutnya akan memanggil fungsi `categorizeDirectory()`.
+```c
+void categorizeDirectory(char *folderPath, int thread)
+{
+    DIR *directory = opendir(folderPath);
+    struct dirent *dr;
+    pthread_t tid[thread];
+    int count = 0;
+    char fileName[400][400];
+
+    while ((dr = readdir(directory)) != NULL)
+    {
+        if (dr->d_type == DT_REG)
+        {
+            sprintf(fileName[count], "%s/%s", folderPath, dr->d_name);
+            pthread_create(&tid[count], NULL, categorizeFile, (void *)fileName[count]);
+            count++;
+        }
+        else if ((dr->d_type == DT_DIR) && strcmp(dr->d_name, ".") != 0 && strcmp(dr->d_name, "..") != 0)
+        {
+            char folderPath2[400];
+            sprintf(folderPath2, "%s/%s", folderPath, dr->d_name);
+            DIR *directory2 = opendir(folderPath2);
+            struct dirent *dr2;
+            int thread2 = 0;
+            while ((dr2 = readdir(directory2)) != NULL)
+            {
+                if (dr2->d_type == DT_REG)
+                {
+                    thread2++;
+                }
+            }
+            categorizeDirectory(folderPath2, thread2);
+            closedir(directory2);
+        }
+    }
+
+    for (int i = 0; i < thread; i++)
+        pthread_join(tid[i], NULL);
+    closedir(directory);
+}
+```
+pada fungsi ini berfungsi untuk mencari file yang berada didalam directory. dan akan dibuatkan thread untuk dikategorikan menggunakan fungsi `categorizeFile()`. Setelah itu dilakukan `pthread_join` sejumlah thread yang ada.
+
+### Soal 3c
+Selain menerima opsi-opsi di atas, program ini menerima opsi *, Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika menjalankan program C tersebut.
+```c
+    else if (argc == 2 && strcmp(argv[1], "*") == 0)
+    {
+        char *cwd = getenv("PWD");
+        DIR *directory = opendir(cwd);
+
+        struct dirent *dr;
+        int thread = 0;
+        while ((dr = readdir(directory)) != NULL)
+        {
+            if (dr->d_type == DT_REG)
+            {
+                thread++;
+            }
+        }
+        categorizeDirectory(cwd, thread);
+        closedir(directory);
+    }
+```
+Sama persis dengan soal 3b namun direktori yang dikategorikan adalah direktori dimana program dijalankan atau *working directory*. Sehingga tidak perlu argumen tambahan berupa path directorynya.
+
+### Soal 3d
+Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
+```c
+char *getExt(char *dir)
+{
+    char *unk = {"Unknown"};
+    char *hid = {"Hidden"};
+    char *tmp = strrchr(dir, '/');
+
+    if (tmp[1] == '.')
+        return hid;
+
+    int i = 0;
+    while (i < strlen(tmp) && tmp[i] != '.')
+        i++;
+    if (i == strlen(tmp))
+        return unk;
+
+    char ext[400];
+    int j = i;
+    while (i < strlen(tmp))
+        ext[i - j] = tmp[i], i++;
+    return toLower(ext + 1);
+}
+```
+Untuk itu di cek pada fungsi ini, dimana jika nama file berawalan `.` maka merupakan hidden files. Dan jika nama file tidak ada `.` maka file tidak memiliki ekstensi.
+
+### Soal 3e
+Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
+```c
+pthread_create();
+```
+Untuk membuat pengkategorian file berjalan pada satu thread maka, menggunakan `pthread_create` saat pemanggilan fungsi `categorizeFile()`.
+
+#### Kendala
+Kesulitan untuk mengecek apakah itu sebuah file atau folder, dan juga pengecekan hidden files.
