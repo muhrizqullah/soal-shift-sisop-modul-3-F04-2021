@@ -523,8 +523,6 @@ FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
 	fprintf(r,")\n");
 	fclose(r);
 ```
-### Output
-#### Soal 1a
 #### Kendala
 Karena sub soalnya banyak maka harus berhati hati dalam menentukan fungsi jadi seperti strcat,strtok apabila penempatannya salah progam akan termined
 
