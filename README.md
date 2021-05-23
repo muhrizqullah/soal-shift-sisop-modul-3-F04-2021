@@ -523,6 +523,10 @@ FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
 	fprintf(r,")\n");
 	fclose(r);
 ```
+### output
+<img alt="soal1" src="https://github.com/muhrizqullah/soal-shift-sisop-modul-3-F04-2021/blob/master/Foto/Screenshot%202021-05-23%20161344.jpg?raw=true">
+<img alt="soal1" src="https://github.com/muhrizqullah/soal-shift-sisop-modul-3-F04-2021/blob/master/Foto/Screenshot%202021-05-23%20161409.jpg?raw=true">
+
 #### Kendala
 Karena sub soalnya banyak maka harus berhati hati dalam menentukan fungsi jadi seperti strcat,strtok apabila penempatannya salah progam akan termined
 
@@ -733,7 +737,6 @@ parent dari child kedua ini akan menjalankan command terakhir, yaitu `head -5`. 
 #### Soal 2a
 Proses memasukankan nilai setiap matriks
 <img alt="soal2aa" src="Foto/2aa.png">
-
 Hasil perkalian matriks dan _looping_ yang berjalan hingga soal 2b selesai
 <img alt="soal2ab" src="Foto/2ab.png">
 <img alt="soal2ac" src="Foto/2ac.png">
