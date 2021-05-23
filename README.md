@@ -9,7 +9,109 @@
 ## Soal 1
 Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini. 
 ### Soal 1a
-Membuat program untuk login dan register user, penggunaan _Socket Programming_ sangat digunakan untuk komunikasi user dengan client,penggunaan _struct_ sangat berperan penting dalam menyimpan isi file yang di _read_.Login sangat penting digunakan untuk
+Membuat program untuk login dan register user, penggunaan _Socket Programming_ sangat digunakan untuk komunikasi user dengan client,penggunaan _struct_ sangat berperan penting dalam menyimpan isi file yang di _read_. Login sangat penting digunakan untuk mengakses fitur lain seperti add,delete dll. Pertama file akan melakukan login apabila dari client melakukan login akan terbaca pada branching
+```C
+else if(strcmp(buff,masuk)==10){
+ 		flag=2;
+                char login1[]="Masukkan:Username_Password\n";
+                write(sockfd, login1, sizeof(login1));
+                continue;
+
+	}
+```
+Kemdudian dilakukan pengecekan di fungsi _exist()_ kalau file nya ada bisa login begitu sebaliknya.
+```C
+if(flag==2)
+    {
+	
+//	printf("buff login:%s\n",buff);
+	flag=0;
+        u=login(buff);
+	if(1 == loginer)
+        {
+//            printf("success");
+        char login[]="Log out dulu!!\n";
+        write(sockfd, login, sizeof(login));
+        continue;
+
+        }
+        else if(1 == exist(u))
+        {
+//            printf("success");
+	strcpy(userlogin,u.name);
+	printf("User Login sekarang:%s\n",userlogin);
+	loginer=1;
+        char login[]="Login Berhasil\n";
+        write(sockfd, login, sizeof(login));
+        continue;
+
+        }
+```
+Kalau belum terdaftar register terlebih dahulu oleh client,kalau terbaca perintah daftar maka dilakukan alur pendaftaran
+```C
+else if(strcmp(buff,daftar)==10){
+		flag=1;
+		char login[]="Masukkan:Username_Password\n";
+       		write(sockfd, login, sizeof(login));
+		continue;
+	}
+```
+Kemudian masuk ke fungsi registerUser untuk mengecek apakah id digunakan atau belum,kalau belum dilakukan register,kalau sudah register ditolak
+```C
+ else if(flag==1)
+    {
+	flag=0;
+        
+        registerUser(buff,sockfd);
+	
+	continue;
+    }
+```
+```C
+void registerUser(char regis[],int sockfd)
+{
+    char name[80];
+    char password[80];
+    int lenght=strlen(regis);
+    char baru[lenght];
+    strcpy(baru,regis); 
+
+    User user;
+    int i;
+    for(i=0; i<USER_MAX; i++)
+    {
+	strtok(baru,":");
+        int nilai=strncmp(strtok(list[i].name,":"),baru,strlen(baru));
+	if(nilai==0)
+        {
+            char register1[]="Register Gagal\n";
+            write(sockfd, register1, sizeof(register1));
+
+            return;
+        }
+    }
+    strcpy(user.name ,regis);
+    writeToFile(user,sockfd);
+}
+```
+```C
+void writeToFile(User u,int sockfd)
+{
+printf("There is user register with username & password :%s\n",u.name);
+
+    FILE *fw = fopen(filename,"a+");
+    fprintf(fw,u.name);
+    fprintf(fw,"\n");
+    fclose(fw);
+     char register1[]="Register Berhasil\n";
+     write(sockfd, register1, sizeof(register1));
+
+}
+ ```
+### Soal 1b
+Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan.
+
+
 
 
 ## Soal 2
