@@ -65,7 +65,7 @@ void *categorizeFile(void *arg)
     if (dir)
         closedir(dir);
     else if (ENOENT == errno)
-        mkdir(srcExt, 0666);
+        mkdir(srcExt, 0777);
 
     char *srcName = getName(srcPath);
     char *cwd = getenv("PWD");
