@@ -7,6 +7,10 @@
 
 # Pembahasan Soal
 ## Soal 1
+Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini. 
+### Soal 1a
+Membuat program untuk login dan register user, penggunaan _Socket Programming_ sangat digunakan untuk komunikasi user dengan client,penggunaan _struct_ sangat berperan penting dalam menyimpan isi file yang di _read_.Login sangat penting digunakan untuk
+
 
 ## Soal 2
 Crypto adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
