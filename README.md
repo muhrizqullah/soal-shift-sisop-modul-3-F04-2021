@@ -232,3 +232,107 @@ Output dari `soal2c.c`
 Sempat kebingungan untuk menentukan pipe yang di-`close()` dan penggunaan `dup2()`
 
 ## Soal 3
+Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa
+gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
+### Soal 3a
+Program menerima opsi -f seperti contoh di atas, jadi pengguna bisa menambahkan argumen file yang bisa dikategorikan sebanyak yang diinginkan oleh pengguna.
+```c
+if (argc > 2 && strcmp(argv[1], "-f") == 0)
+    {
+        int length = argc - 2;
+        pthread_t tid[length];
+        int count = 0;
+        for (int i = 2; i < argc; i++)
+        {
+            if (access(argv[i], F_OK) == 0)
+            {
+                pthread_create(&tid[count], NULL, categorizeFile, (void *)argv[i]);
+                count++;
+                printf("File %d : Berhasil dikategorikan\n", i - 1);
+            }
+            else
+            {
+                printf("File %d : Sad, gagal :(\n", i - 1);
+            }
+        }
+        for (int i = 0; i < count; i++)
+            pthread_join(tid[i], NULL);
+        return 0;
+    }
+```
+Pertama dilakukan pengecekan opsi yang dipilih pada `argv[1]` setelah itu dilakukan perulangan dari `argv[2]` hingga argumen terakhir, untuk dibuatkan thread untuk mengkategorikan file dan disimpan di *working directory* menggunakan fungsi `categorizeFile()`. Sebelum itu dilakukan pengecekan apakah argumen yang diberikan merupakan file yang valid.
+Setelah itu dilakukan `pthread_join` sejumlah thread yang dibuat.
+```c
+void *categorizeFile(void *arg)
+{
+    char *src = (char *)arg;
+    char srcPath[150];
+    memcpy(srcPath, (char *)arg, 400);
+    char *srcExt = getExt(src);
+    char ext[400];
+    strcpy(ext, srcExt);
+
+    DIR *dir = opendir(srcExt);
+    if (dir)
+        closedir(dir);
+    else if (ENOENT == errno)
+        mkdir(srcExt, 0666);
+
+    char *srcName = getName(srcPath);
+    char *cwd = getenv("PWD");
+
+    char destPath[10000];
+    sprintf(destPath, "%s/%s/%s", cwd, ext, srcName);
+    rename(srcPath, destPath);
+}
+```
+Pada `categorizeFile()` berfungsi untuk memanggil fungsi `getExt()` untuk mendapatkan extensi filenya dan memanggil fungsi `getName()` untuk mendapatkan nama dari filenya. Fungsi ini juga berfungsi untuk membuat direktori dan juga mengkategorikan filenya.
+```c
+char *getName(char *dir)
+{
+    char *name = strrchr(dir, '/');
+    if (name == dir)
+        return "";
+    return name + 1;
+}
+```
+Fungsi ini untuk mendapatkan nama dari file yang dipilih.
+```c
+char *getExt(char *dir)
+{
+    char *unk = {"Unknown"};
+    char *hid = {"Hidden"};
+    char *tmp = strrchr(dir, '/');
+
+    if (tmp[1] == '.')
+        return hid;
+
+    int i = 0;
+    while (i < strlen(tmp) && tmp[i] != '.')
+        i++;
+    if (i == strlen(tmp))
+        return unk;
+
+    char ext[400];
+    int j = i;
+    while (i < strlen(tmp))
+        ext[i - j] = tmp[i], i++;
+    return toLower(ext + 1);
+}
+```
+Fungsi ini untuk mendapatkan ekstensi file termasuk jika ia adalah *hidden files* dan juga jika tidak memiliki ekstensi.
+```c
+char *toLower(char *str)
+{
+    unsigned char *temp = (unsigned char *)str;
+    while (*temp)
+    {
+        *temp = tolower(*temp);
+        temp++;
+    }
+    return str;
+}
+```
+Untuk mengubah huruf kapital menjadi huruf kecil.
+
+### Soal 3b

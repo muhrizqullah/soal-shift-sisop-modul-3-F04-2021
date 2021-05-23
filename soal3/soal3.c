@@ -55,8 +55,8 @@ char *getExt(char *dir)
 void *categorizeFile(void *arg)
 {
     char *src = (char *)arg;
-    char srcP[150];
-    memcpy(srcP, (char *)arg, 400);
+    char srcPath[150];
+    memcpy(srcPath, (char *)arg, 400);
     char *srcExt = getExt(src);
     char ext[400];
     strcpy(ext, srcExt);
@@ -67,12 +67,12 @@ void *categorizeFile(void *arg)
     else if (ENOENT == errno)
         mkdir(srcExt, 0666);
 
-    char *srcName = getName(srcP);
+    char *srcName = getName(srcPath);
     char *cwd = getenv("PWD");
 
-    char destP[10000];
-    sprintf(destP, "%s/%s/%s", cwd, ext, srcName);
-    rename(srcP, destP);
+    char destPath[10000];
+    sprintf(destPath, "%s/%s/%s", cwd, ext, srcName);
+    rename(srcPath, destPath);
 }
 
 void categorizeDirectory(char *folderPath, int threadSize)
@@ -117,10 +117,7 @@ void categorizeDirectory(char *folderPath, int threadSize)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
-        exit(EXIT_FAILURE);
-
-    else if (argc > 2 && strcmp(argv[1], "-f") == 0)
+    if (argc > 2 && strcmp(argv[1], "-f") == 0)
     {
         int length = argc - 2;
         pthread_t tid[length];
