@@ -501,6 +501,32 @@ else if(flag==10){
 continue;
   }
 ```
+### Soal 1h
+Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama running.log. Contoh isi dari log ini adalah
+Tambah:
+```C
+FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
+	fprintf(r,"Tambah:");
+	fprintf(r,save[i-2]);
+	fprintf(r,"(");
+	fprintf(r,userlogin);
+	fprintf(r,")\n");
+	fclose(r);
+```
+Delete:
+```C
+FILE *r=fopen("/home/fiansyah/praktikum3/finak/server/running.log","a+");
+	fprintf(r,"Hapus:");
+	fprintf(r,buff);
+	fprintf(r,"(");
+	fprintf(r,userlogin);
+	fprintf(r,")\n");
+	fclose(r);
+```
+### Output
+#### Soal 1a
+#### Kendala
+Karena sub soalnya banyak maka harus berhati hati dalam menentukan fungsi jadi seperti strcat,strtok apabila penempatannya salah progam akan termined
 
 ## Soal 2
 Crypto adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
